@@ -1,6 +1,33 @@
 <?php
 
-class Person
+interface Animal
+{
+    public function eat();
+    public function run();
+}
+
+class Fly implements Animal
+{
+    public function eat()
+    {
+
+    }
+
+    public function run()
+    {
+
+    }
+}
+
+abstract class Test
+{
+    public $test;
+
+    public function getDetails()
+    {}
+}
+
+class Person extends Test
 {
     /**
      * Person's full name
