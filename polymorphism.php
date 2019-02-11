@@ -40,3 +40,17 @@ class MyOtherClass implements test2
     }
 
 }
+
+//  *************************** Abstract
+abstract class MyAbstractClass
+{
+    private $name;
+    public function setName()
+    {
+
+    }
+    public function getname()
+    {
+
+    }
+}
