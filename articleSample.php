@@ -1,5 +1,45 @@
 <?php
 
+/**
+ * Writer interface for selecting type
+ */
+interface poly_writer_Writer
+{
+    /**
+     * For returning kind of contents
+     *
+     * @param poly_base_Article $obj
+     * @return string
+     */
+    public function write(poly_base_Article $obj);
+}
+
+/**
+ * XmlWriter which implements the writer interface and returns xml type of content
+ */
+class poly_write_XMLWriter implements poly_writer_Writer
+{
+    public function write(poly_base_Article $obj)
+    {
+        $ret = '<article>';
+        $ret .= '<title>' . $this->title . '</title>';
+        $ret .= '<author>' . $this->author . '</author>';
+        $ret .= '<date>' . $this->date . '</date>';
+        $ret .= '<category>' . $this->category . '</category>';
+        $ret .= '</article>';
+        return $ret;
+    }
+}
+
+class poly_write_JsonWriter implements poly_writer_Writer
+{
+    public function write(poly_base_Article $obj)
+    {
+        $array = array('article' => $this);
+        return json_encode($array);
+    }
+}
+
 class poly_base_Article
 {
     /**
@@ -48,27 +88,78 @@ class poly_base_Article
 
     /**
      * Output the information into different formats
+     * All this method does now is accept and object of writer class (* that is any of class implementing the writer interface)
+     * call its write method, passing itslef as the argument then forward its return value straight to the client code
+     *
+     * It no longer needs to worry about the details of formatting data, and it can focus on its main task
      *
      * @param string $type
      * @return object, string
+     *  *** The good and correct way *****
      */
-    public function write($type)
+    //
+    public function write(poly_writer_Writer $writer)
     {
-        $ret = '';
-        switch ($type) {
-            case 'XML':
-                $ret = '<article>';
-                $ret .= '<title>' . $this->title . '</title>';
-                $ret .= '<author>' . $this->author . '</author>';
-                $ret .= '<date>' . $this->date . '</date>';
-                $ret .= '<category>' . $this->category . '</category>';
-                $ret .= '</article>';
-                break;
-            case 'JSON':
-                $array = array('article' => $this);
-                $ret = json_encode($array);
+        return $writer->write($this);
+    }
+    // **** The bad way ********
+    // public function write($type)
+    // {
+    //     $ret = '';
+    //     switch ($type) {
+    //         case 'XML':
+    //             $ret = '<article>';
+    //             $ret .= '<title>' . $this->title . '</title>';
+    //             $ret .= '<author>' . $this->author . '</author>';
+    //             $ret .= '<date>' . $this->date . '</date>';
+    //             $ret .= '<category>' . $this->category . '</category>';
+    //             $ret .= '</article>';
+    //             break;
+    //         case 'JSON':
+    //             $array = array('article' => $this);
+    //             $ret = json_encode($array);
+    //     }
+
+    //     return $ret;
+    // }
+
+}
+
+/**
+ * Determine the format of writer that client wants
+ *
+ */
+class poly_base_factory
+{
+    /**
+     * Get type of writer
+     *
+     * @return object
+     */
+    public static function getWriter()
+    {
+        // grab request variable
+        echo $format = $_REQUEST['format'];
+        // construct our class name and check its existence
+        $class = 'poly_writer_' . $format . 'Writer';
+
+        if (class_exists($class)) {
+            // return a new writer object
+            return new $class();
         }
 
-        return $ret;
+        throw new Exception('Unsupported format');
     }
 }
+
+// Put it all together
+$article = new poly_base_Article('Polymorphism', 'Mohammad', time(), 1);
+
+try {
+    $writer = poly_base_factory::getWriter();
+} catch (Exception $e) {
+    // Set default value
+    $writer = new poly_write_XMLWriter();
+}
+
+echo $article->write($writer);
