@@ -12,6 +12,7 @@ interface poly_writer_Writer
      * @return string
      */
     public function write(poly_base_Article $obj);
+    
 }
 
 /**
@@ -141,7 +142,7 @@ class poly_base_factory
         // grab request variable
         echo $format = $_REQUEST['format'];
         // construct our class name and check its existence
-        $class = 'poly_writer_' . $format . 'Writer';
+        $class = 'poly_writer_' . $format . '_Writer';
 
         if (class_exists($class)) {
             // return a new writer object

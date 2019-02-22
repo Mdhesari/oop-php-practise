@@ -1,5 +1,9 @@
 <?php
 
+use telegram\home as telegram;
+
+$tlg = new telegram\Telegram();
+
 interface Animal
 {
     public function eat();
